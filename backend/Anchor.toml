@@ -1,0 +1,12 @@
+[programs.mainnet]
+marketplace = "6gN1UbdvbuFr1vLfa7srVvDutoM4t9FzWsoZrMBFDyXL"
+
+[registry]
+url = "https://anchor.projectserum.com"
+
+[provider]
+cluster = "mainnet"
+wallet = "/home/ubuntu/.config/solana/id.json"
+
+[scripts]
+test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
