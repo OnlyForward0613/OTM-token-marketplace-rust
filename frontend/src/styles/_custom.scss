@@ -1,0 +1,14 @@
+.wallet-adapter-button-trigger {
+    border-radius: 40px !important;
+    height: 41px !important;
+
+    @media (max-width: 992px) {
+        font-size: 14px !important;
+        height: 32px !important;
+        margin-right: 10px;
+    }
+}
+.MuiMenuItem-root {
+    color: #00effe !important;
+    font-size: 14px !important;
+}
