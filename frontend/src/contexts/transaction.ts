@@ -254,7 +254,7 @@ export const buy = async (
         let tokenMint = state.tokenAddress;
         let lister = state.lister;
         const [tokenListK, bump] = await PublicKey.findProgramAddress(
-            [userAddress.toBytes(), tokenMint.toBytes()],
+            [lister.toBytes(), tokenMint.toBytes()],
             program.programId
         );
         let { instructions, destinationAccounts } = await getATokenAccountsNeedCreate(
