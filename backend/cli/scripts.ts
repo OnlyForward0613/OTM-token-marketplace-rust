@@ -18,7 +18,7 @@ import { publicKey } from '@project-serum/anchor/dist/cjs/utils';
 // import { Raffle } from '../target/types/raffle';
 
 
-const PROGRAM_ID = "6gN1UbdvbuFr1vLfa7srVvDutoM4t9FzWsoZrMBFDyXL";
+const PROGRAM_ID = "2beT9QL7MdcmtpmRgX926XYukCdGXjVFr656CMKqHYAe";
 const TREASURY_WALLET = new PublicKey("32NL69SFk8GLPFZfKQwsuexcXHd7rqAQn1mrasF1ksVj");
 
 const LIST_SIZE = 96;
@@ -30,7 +30,7 @@ const payer = anchor.getProvider().wallet;
 console.log(payer.publicKey.toBase58());
 
 const idl = JSON.parse(
-    fs.readFileSync(__dirname + "/raffle.json", "utf8")
+    fs.readFileSync(__dirname + "/marketplace.json", "utf8")
 );
 
 let program: Program = null;
@@ -44,14 +44,10 @@ console.log('ProgramId: ', program.programId.toBase58());
 
 const main = async () => {
 
-    // await createRaffle(payer.publicKey, new PublicKey("GF4XmpVKCf9aozU5igmr9sKNzDBkjvmiWujx8uC7Bnp4"), 1, 0, 0, 1652076787, 1, 1, 100);
-    // await updateRafflePeriod(payer.publicKey, new PublicKey("HyomvqtLBjHhPty1P6dKzNf5gNow9qbfGkxj69pqBD8Z"), 1649355012);
-    // await buyTicket(payer.publicKey, new PublicKey("14njy5aKYoAvz3Ut8ojfYULhEKbBDXcXidZ3xK6jZs7U"), 10);
-    // await revealWinner(payer.publicKey, new PublicKey("14njy5aKYoAvz3Ut8ojfYULhEKbBDXcXidZ3xK6jZs7U"));
-    // await claimReward(payer.publicKey, new PublicKey("14njy5aKYoAvz3Ut8ojfYULhEKbBDXcXidZ3xK6jZs7U"));
-    // await withdrawNft(payer.publicKey, new PublicKey("GF4XmpVKCf9aozU5igmr9sKNzDBkjvmiWujx8uC7Bnp4"));
-    // const pool = await getRaffleState(new PublicKey("5E5PGFEhgN2hFq488ERAA1Lm4xyUJifxRDKGE5172gg1"));
-    // console.log(pool.endTimestamp.toNumber());
+    // await listToken(payer.publicKey, new PublicKey('htoHLBJV1err8xP5oxyQdV2PLQhtVjxLXpKB7FsgJQD'), 0.1, 10);
+    // await delist(payer.publicKey, new PublicKey('E5pY6sK4WRneUhCdX3brwgtanteVdr21zdLe8ct9mS4a'));
+    // await update(payer.publicKey, new PublicKey('E5pY6sK4WRneUhCdX3brwgtanteVdr21zdLe8ct9mS4a'), 7);
+    await buy(payer.publicKey, new PublicKey("2j5bSYdZMBDGHEU6yVxofy1nX6vUaWeTiMEpmh1QKWrH"), new PublicKey("Fs8R7R6dP3B7mAJ6QmWZbomBRuTbiJyiR4QYjoxhLdPu"), 0, 5);
 }
 
 export const listToken = async (
@@ -64,6 +60,7 @@ export const listToken = async (
         [userAddress.toBytes(), tokenMint.toBytes()],
         program.programId
     );
+    console.log(tokenList.toBase58());
 
     let listerTokenAccount = await getAssociatedTokenAccount(userAddress, tokenMint);
     let { instructions, destinationAccounts } = await getATokenAccountsNeedCreate(
@@ -140,7 +137,7 @@ export const delist = async (
         bump, {
         accounts: {
             lister: userAddress,
-            tokeList: tokenListkey,
+            tokenList: tokenListkey,
             listerTokenAccount,
             vaultAccount,
             tokenMint,
@@ -159,6 +156,7 @@ export const update = async (
     newAmount: number,
 ) => {
     const state: TokenList = await getStateByKey(tokenListkey);
+    if (state === null) return;
     let tokenMint = state.tokenAddress;
     const [tokenListK, bump] = await PublicKey.findProgramAddress(
         [userAddress.toBytes(), tokenMint.toBytes()],
@@ -171,7 +169,7 @@ export const update = async (
         bump, new anchor.BN(newAmount), {
         accounts: {
             lister: userAddress,
-            tokeList: tokenListkey,
+            tokenList: tokenListkey,
             tokenMint,
             listerTokenAccount,
             vaultAccount,
@@ -198,14 +196,20 @@ export const buy = async (
         [lister.toBytes(), tokenMint.toBytes()],
         program.programId
     );
+    let { instructions, destinationAccounts } = await getATokenAccountsNeedCreate(
+        solConnection,
+        userAddress,
+        userAddress,
+        [tokenMint]
+    );
+
     let buyerTokenAccount = await getAssociatedTokenAccount(userAddress, tokenMint);
     let vaultAccount = await getAssociatedTokenAccount(tokenListkey, tokenMint);
-
-    const tx = await program.rpc.buy(
+    let tx = await program.rpc.buy(
         bump, new anchor.BN(artistFee), new anchor.BN(amount), {
         accounts: {
             buyer: userAddress,
-            tokeList: tokenListkey,
+            tokenList: tokenListkey,
             buyerTokenAccount,
             vaultAccount,
             tokenMint,
@@ -215,9 +219,10 @@ export const buy = async (
             tokenProgram: TOKEN_PROGRAM_ID,
             systemProgram: SystemProgram.programId,
         },
-        instructions: [],
+        instructions: [...instructions],
         signers: [],
     });
+
     await solConnection.confirmTransaction(tx, "finalized");
     console.log("txHash = ", tx);
 
@@ -227,7 +232,8 @@ export const getStateByKey = async (
     tokenListKey: PublicKey
 ): Promise<TokenList | null> => {
     try {
-        let listState = await program.account.tokenlist.fetch(tokenListKey);
+        let listState = await program.account.tokenList.fetch(tokenListKey);
+        console.log(listState);
         return listState as TokenList;
     } catch {
         return null;

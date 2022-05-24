@@ -264,8 +264,8 @@ export const buy = async (
             [tokenMint]
         );
 
-        let buyerTokenAccount = await getAssociatedTokenAccount(userAddress, tokenMint);
         let vaultAccount = await getAssociatedTokenAccount(tokenListkey, tokenMint);
+
         let tx = new Transaction();
         if (instructions.length !== 0) tx.add(...instructions)
         tx.add(program.instruction.buy(
@@ -276,7 +276,7 @@ export const buy = async (
                 accounts: {
                     buyer: userAddress,
                     tokenList: tokenListkey,
-                    buyerTokenAccount,
+                    buyerTokenAccount: destinationAccounts[0],
                     vaultAccount,
                     tokenMint,
                     lister,

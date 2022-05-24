@@ -3,7 +3,10 @@ import { PublicKey } from "@solana/web3.js";
 export const NETWORK = "devnet"
 export const ADMIN_LIST = [
   {
-    address: "3DEjA83G8z4CnTGBuynMeQNu8KNdsKutSUyhUBLxtpqW"
+    address: "3DEjA83G8z4CnTGBuynMeQNu8KNdsKutSUyhUBLxtpqW",
+  },
+  {
+    address: "Fe4KejEc1pgo6MxjfRGYL1u5qMpYN7FMxPKYjbrdsFFE",
   }
 ]
 
@@ -11,18 +14,18 @@ export const TOKEN_ACCOUNT = "https://public-api.solscan.io/account/";
 export const TOKEN_META = "https://public-api.solscan.io/token/meta?tokenAddress=";
 
 export const firebaseConfig = {
-  apiKey: "AIzaSyDsVP46x_Tze43MT4pqRxGA7XuicEdz5MA",
-  authDomain: "otm-marketplace.firebaseapp.com",
-  projectId: "otm-marketplace",
-  storageBucket: "otm-marketplace.appspot.com",
-  messagingSenderId: "393270249819",
-  appId: "1:393270249819:web:2267c3f7ccb9f924fff27e",
-  measurementId: "G-2LZKEH7M5M"
+  apiKey: "AIzaSyD0Nn-imzOhRsXs8aqFyR5hwMQLsQnRvQc",
+  authDomain: "otm-coinmarketplace.firebaseapp.com",
+  projectId: "otm-coinmarketplace",
+  storageBucket: "otm-coinmarketplace.appspot.com",
+  messagingSenderId: "219970397835",
+  appId: "1:219970397835:web:61a6bd3aa491433def568e",
+  measurementId: "G-SS0GMV3J3B"
 };
 
 export const EMPTY_ADDRESS = "11111111111111111111111111111111111111111111"
 
-export const PROGRAM_ID = "2beT9QL7MdcmtpmRgX926XYukCdGXjVFr656CMKqHYAe";
+export const PROGRAM_ID = "GvZajWcoaaencLox2VZr42p6qt3RTtvXXh7TrsVc59N4";
 export const TREASURY_WALLET = new PublicKey("32NL69SFk8GLPFZfKQwsuexcXHd7rqAQn1mrasF1ksVj");
 
 export const LIST_SIZE = 96;

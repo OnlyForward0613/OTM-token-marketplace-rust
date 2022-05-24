@@ -1,13 +1,10 @@
-use anchor_lang::{prelude::*,
-    error_code,
-    AccountSerialize};
-    
+use anchor_lang::{prelude::*, AccountSerialize};
 use anchor_spl::{
     associated_token::AssociatedToken,
     token::{self, Token, TokenAccount, Transfer},
 };
-use solana_program::pubkey::Pubkey;
 use solana_program::entrypoint::ProgramResult;
+use solana_program::pubkey::Pubkey;
 use spl_token::instruction::*;
 
 pub mod account;
@@ -20,7 +17,7 @@ use constants::*;
 use error::*;
 use utils::*;
 
-declare_id!("6gN1UbdvbuFr1vLfa7srVvDutoM4t9FzWsoZrMBFDyXL");
+declare_id!("GvZajWcoaaencLox2VZr42p6qt3RTtvXXh7TrsVc59N4");
 
 #[program]
 pub mod marketplace {
@@ -82,8 +79,8 @@ pub mod marketplace {
         ];
         let signer = &[&seeds[..]];
         let cpi_accounts = Transfer {
-            from: dest_token_account_info.to_account_info(),
-            to: src_token_account_info.to_account_info(),
+            from: src_token_account_info.to_account_info(),
+            to: dest_token_account_info.to_account_info(),
             authority: token_list.to_account_info().clone(),
         };
         token::transfer(
@@ -94,6 +91,7 @@ pub mod marketplace {
             ),
             amount,
         )?;
+        token_list.amount = 0;
 
         Ok(())
     }
@@ -146,6 +144,7 @@ pub mod marketplace {
                 def_amount,
             )?;
         }
+        token_list.amount = new_amount;
         Ok(())
     }
 
@@ -159,8 +158,8 @@ pub mod marketplace {
             return Err(error!(OTMError::InvalidLister));
         }
 
-        if ctx.accounts.creator.key() != SERVICE_WALLET.parse::<Pubkey>().unwrap() {
-            return Err(error!(OTMError::InvalidCreator));
+        if ctx.accounts.treasury_wallet.key() != SERVICE_WALLET.parse::<Pubkey>().unwrap() {
+            return Err(error!(OTMError::InvalidService));
         }
         let price = token_list.price;
         let total_price = price * amount;
@@ -214,6 +213,7 @@ pub mod marketplace {
             ),
             total_amount,
         )?;
+        token_list.amount -= amount;
 
         Ok(())
     }
@@ -226,7 +226,7 @@ pub struct ListToken<'info> {
     pub lister: Signer<'info>,
 
     #[account(
-        init,
+        init_if_needed,
         seeds = [lister.key().as_ref(), token_mint.key().as_ref()],
         bump,
         payer = lister,
@@ -340,12 +340,14 @@ pub struct BuyToken<'info> {
     pub token_mint: AccountInfo<'info>,
 
     /// CHECK: This is not dangerous because we don't read or write from this account
+    #[account(mut)]
     pub lister: AccountInfo<'info>,
 
     /// CHECK: This is not dangerous because we don't read or write from this account
+    #[account(mut)]
     pub creator: AccountInfo<'info>,
-    
     /// CHECK: This is not dangerous because we don't read or write from this account
+    #[account(mut)]
     pub treasury_wallet: AccountInfo<'info>,
 
     pub token_program: Program<'info, Token>,

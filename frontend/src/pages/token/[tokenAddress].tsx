@@ -256,6 +256,7 @@ export default function TokenDetail(props: { startLoading: Function, closeLoadin
                                             <th align="left">Price</th>
                                             <th align="left">Quantity</th>
                                             <th></th>
+                                            <th></th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -279,6 +280,7 @@ export default function TokenDetail(props: { startLoading: Function, closeLoadin
                                                         closeLoading={() => props.closeLoading()}
                                                     />
                                                 </td>
+                                                <td align="right">{item.userAddress === wallet.publicKey?.toBase58() && <span className="your-own">Your own listing</span>}</td>
                                             </tr>
                                         ))}
                                     </tbody>

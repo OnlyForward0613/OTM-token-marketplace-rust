@@ -6,8 +6,8 @@ pub enum OTMError {
     InvalidLister,
     #[msg("Invalid Token")]
     InvalidToken,
-    #[msg("Invalid Creator")]
-    InvalidCreator,
+    #[msg("Invalid Serve Wallet")]
+    InvalidService,
     #[msg("Overflow Token")]
     OverflowToken,
 }
