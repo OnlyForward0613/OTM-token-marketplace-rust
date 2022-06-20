@@ -45,5 +45,6 @@ export interface TokenList {
     lister: PublicKey,
     tokenAddress: PublicKey,
     price: anchor.BN,
+    decimals: anchor.BN,
     amount: anchor.BN
 }

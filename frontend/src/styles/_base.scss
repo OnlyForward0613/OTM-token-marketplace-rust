@@ -95,7 +95,7 @@ body {
 }
 
 .header {
-    position: absolute;
+    // position: absolute;s
     width: 100%;
     left: 0;
     top: 0;
@@ -427,4 +427,14 @@ span.your-own {
     font-size: 14px;
     color: #ff913e;
     text-transform: uppercase;
+}
+.deni-notice {
+    position: sticky;
+    top: 0;
+    text-align: center;
+    color: #fff;
+    font-size: 16px;
+    padding: 15px 15px;
+    background: #cd0000c2;
+    z-index: 9999;
 }

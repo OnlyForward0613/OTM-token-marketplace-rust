@@ -6,9 +6,6 @@ import { TOKEN_ACCOUNT, TOKEN_META } from "../../config";
 import { CloseIcon } from "../svgIcons";
 import MarketOverviewSkeleton from "../MarketOverviewSkeleton";
 import CopyClipboard from "../CopyClipbord";
-import { database } from "../../firebase/firebaseConfig";
-import { doc, updateDoc } from "firebase/firestore";
-import { successAlert } from "../toastGroup";
 import { update } from "../../contexts/transaction";
 import { PublicKey } from "@solana/web3.js";
 
@@ -22,6 +19,8 @@ export default function ListingEditDialog(props: {
     pda: string,
     listedId: string,
     updateTable: Function
+    openDeny: Function,
+    closeDeny: Function
 }) {
     const { opened, onClose, pda, price, quantity, listedId, tokenAddress, wallet, updateTable, } = props;
     const [name, setName] = useState("");
@@ -87,10 +86,28 @@ export default function ListingEditDialog(props: {
         clearField();
         updateTable();
     }
+
+    const startHandle = () => {
+        setIsProcessing(true);
+        props.openDeny();
+    }
+
+    const closeHandle = () => {
+        setIsProcessing(false);
+        props.closeDeny();
+    }
     const handleUpdate = async () => {
         if (listAmount === undefined) return;
         try {
-            await update(wallet, new PublicKey(pda), listAmount, listedId, () => setIsProcessing(true), () => setIsProcessing(false), () => updateState())
+            await update(
+                wallet,
+                new PublicKey(pda),
+                listAmount,
+                listedId,
+                () => startHandle(),
+                () => closeHandle(),
+                () => updateState()
+            )
         } catch (error) {
             console.log(error)
         }

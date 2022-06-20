@@ -25,8 +25,8 @@ export const firebaseConfig = {
 
 export const EMPTY_ADDRESS = "11111111111111111111111111111111111111111111"
 
-export const PROGRAM_ID = "GvZajWcoaaencLox2VZr42p6qt3RTtvXXh7TrsVc59N4";
+export const PROGRAM_ID = "BThh28ELg1UhsZwJshoJiCWqbH4WfzLVd6zJNecrTMTV";
 export const TREASURY_WALLET = new PublicKey("32NL69SFk8GLPFZfKQwsuexcXHd7rqAQn1mrasF1ksVj");
 
 export const LIST_SIZE = 96;
-export const DECIMALS = 1000000000;
+export const DECIMALS = 1_000_000_000;

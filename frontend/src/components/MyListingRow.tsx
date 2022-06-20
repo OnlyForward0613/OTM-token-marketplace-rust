@@ -23,6 +23,8 @@ export default function MyListingRow(props: {
     wallet: WalletContextState,
     startLoading: Function,
     closeLoading: Function,
+    openDeny: Function,
+    closeDeny: Function
 }) {
     const { tokenAddress, listedId, quantity, wallet, price, icon, name, getLists, pda, startLoading, closeLoading } = props;
     const [editDialog, setEditDialog] = useState(false);
@@ -30,7 +32,16 @@ export default function MyListingRow(props: {
     const handleRemove = async () => {
         setRemoveAlert(false);
         try {
-            await delist(wallet, new PublicKey(pda), listedId, () => startLoading(), () => closeLoading(), () => getLists());
+            await delist(
+                wallet,
+                new PublicKey(pda),
+                listedId,
+                () => startLoading(),
+                () => closeLoading(),
+                () => getLists(),
+                () => props.openDeny(),
+                () => props.closeDeny()
+            );
         } catch (error) {
             console.log(error)
         }
@@ -38,69 +49,76 @@ export default function MyListingRow(props: {
 
     return (
         ((name + tokenAddress + wallet.publicKey?.toBase58()).toLowerCase().indexOf(props.keyword.toLowerCase()) !== -1 ?
-            <tr >
-                <td>
-                    <div className="table-title-cell">
-                        <Link href={"/token/" + tokenAddress}>
-                            <a>
-                                {/* eslint-disable-next-line */}
-                                <img
-                                    src={icon ? icon : "/img/unknown-icon.png"}
-                                    alt=""
-                                />
-                                <h5>{name}</h5>
-                            </a>
-                        </Link>
-                    </div>
-                </td>
-                <td>
-                    <div className="price-cell">
-                        <div className="price-cell-quantiry">
-                            <CopyClipboard text={tokenAddress}>
-                                {tokenAddress.slice(0, 6)}...{tokenAddress.slice(-6)}
-                            </CopyClipboard>
-                        </div>
-                    </div>
-                </td>
-                <td align="left">
-                    <span>
-                        {quantity}
-                    </span>
-                </td>
-                <td align="left">
-                    <span>
-                        {price}◎
-                    </span>
-                </td>
-                <td align="center" style={{ display: "flex", justifyContent: "center" }}>
-                    {wallet.publicKey !== null &&
-                        <>
-                            <button className="btn-outline" onClick={() => setEditDialog(true)}>
-                                Edit
-                            </button>
-                            <button className="btn-outline btn-remove" onClick={() => setRemoveAlert(true)}>
-                                <TrashIcon />
-                            </button>
-                        </>
-                    }
-                    <ListingEditDialog
-                        opened={editDialog}
-                        onClose={() => setEditDialog(false)}
-                        wallet={wallet}
-                        tokenAddress={tokenAddress}
-                        quantity={quantity}
-                        price={parseFloat(price)}
-                        pda={pda}
-                        listedId={listedId}
-                        updateTable={getLists}
-                    />
-                    <RemoveAlert
-                        opened={removeAlert}
-                        onClose={() => setRemoveAlert(false)}
-                        handleRemove={() => handleRemove()}
-                    />
-                </td>
-            </tr>
+            (
+                quantity !== 0 ?
+                    <tr>
+                        <td>
+                            <div className="table-title-cell">
+                                <Link href={"/token/" + tokenAddress}>
+                                    <a>
+                                        {/* eslint-disable-next-line */}
+                                        <img
+                                            src={icon ? icon : "/img/unknown-icon.png"}
+                                            alt=""
+                                        />
+                                        <h5>{name}</h5>
+                                    </a>
+                                </Link>
+                            </div>
+                        </td>
+                        <td>
+                            <div className="price-cell">
+                                <div className="price-cell-quantiry">
+                                    <CopyClipboard text={tokenAddress}>
+                                        {tokenAddress.slice(0, 6)}...{tokenAddress.slice(-6)}
+                                    </CopyClipboard>
+                                </div>
+                            </div>
+                        </td>
+                        <td align="left">
+                            <span>
+                                {quantity}
+                            </span>
+                        </td>
+                        <td align="left">
+                            <span>
+                                {price}◎
+                            </span>
+                        </td>
+                        <td align="center" style={{ display: "flex", justifyContent: "center" }}>
+                            {wallet.publicKey !== null &&
+                                <>
+                                    <button className="btn-outline" onClick={() => setEditDialog(true)}>
+                                        Edit
+                                    </button>
+                                    <button className="btn-outline btn-remove" onClick={() => setRemoveAlert(true)}>
+                                        <TrashIcon />
+                                    </button>
+                                </>
+                            }
+                            <ListingEditDialog
+                                opened={editDialog}
+                                onClose={() => setEditDialog(false)}
+                                wallet={wallet}
+                                tokenAddress={tokenAddress}
+                                quantity={quantity}
+                                price={parseFloat(price)}
+                                pda={pda}
+                                listedId={listedId}
+                                updateTable={getLists}
+                                openDeny={() => props.openDeny()}
+                                closeDeny={() => props.closeDeny()}
+                            />
+                            <RemoveAlert
+                                opened={removeAlert}
+                                onClose={() => setRemoveAlert(false)}
+                                handleRemove={() => handleRemove()}
+                            />
+                        </td>
+                    </tr>
+                    :
+                    <></>
+            )
             :
             <>
             </>
