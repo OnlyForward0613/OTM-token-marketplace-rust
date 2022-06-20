@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { addDoc, doc, getDocs, updateDoc, collectionGroup } from "firebase/firestore";
+import { addDoc, doc, getDocs, updateDoc, collectionGroup, collection, query, onSnapshot, where } from "firebase/firestore";
 import { useRouter } from "next/router";
 import MarketOverviewSkeleton from "../../components/MarketOverviewSkeleton";
 import { TOKEN_ACCOUNT, TOKEN_META } from "../../config";
@@ -12,14 +12,13 @@ import { IconButton } from "@mui/material";
 import CachedRoundedIcon from "@mui/icons-material/CachedRounded";
 import { useWallet, WalletContextState } from "@solana/wallet-adapter-react";
 import HashLoader from "react-spinners/HashLoader";
-import { successAlert } from "../../components/toastGroup";
-import { database, db } from "../../firebase/firebaseConfig";
+import { db } from "../../firebase/firebaseConfig";
 import moment from "moment";
 import CopyClipboard from "../../components/CopyClipbord";
 import { buy } from "../../contexts/transaction";
-import { PublicKey, SystemProgram } from "@solana/web3.js";
+import { PublicKey } from "@solana/web3.js";
 
-export default function TokenDetail(props: { startLoading: Function, closeLoading: Function }) {
+export default function TokenDetail(props: { startLoading: Function, closeLoading: Function, openDeny: Function, closeDeny: Function }) {
     const router = useRouter();
     const { tokenAddress } = router.query;
     const [tab, setTab] = useState("listings");
@@ -88,9 +87,9 @@ export default function TokenDetail(props: { startLoading: Function, closeLoadin
     }
 
     const getListingData = () => {
-        setListedList([]);
-        setIsFetching(true)
         if (wallet.publicKey === null) return;
+        setIsFetching(true)
+        let filtered: any = [];
         getDocs(listInstance)
             .then(async (data) => {
                 const lists = (data.docs.map((item: any) => {
@@ -105,7 +104,6 @@ export default function TokenDetail(props: { startLoading: Function, closeLoadin
                     for (let item of Object.keys(result)) {
                         if (item === tokenAddress) {
                             let listData = result[item];
-                            let filtered = [];
                             for (let item of listData) {
                                 if (item.amount !== 0) {
                                     filtered.push(item)
@@ -181,6 +179,26 @@ export default function TokenDetail(props: { startLoading: Function, closeLoadin
         }
         // eslint-disable-next-line
     }, [wallet.connected, router])
+
+    useEffect(() => {
+        const collectionRefToken = collection(db, "tokens");
+        const qToken = query(collectionRefToken);
+        const collectionRefListings = collection(db, "listings");
+        const qListings = query(collectionRefListings);
+        const collectionRefSales = collection(db, "sales");
+        const qSales = query(collectionRefSales);
+        onSnapshot(qToken, () => {
+            updatePage();
+        });
+        onSnapshot(qListings, () => {
+            updatePage();
+        });
+        onSnapshot(qSales, () => {
+            updatePage();
+        });
+        return;
+        // eslint-disable-next-line
+    }, [])
 
     return (
         <main className="main-page" style={{ paddingTop: 150 }}>
@@ -265,22 +283,28 @@ export default function TokenDetail(props: { startLoading: Function, closeLoadin
                                                 <td>{item.price}◎</td>
                                                 <td>{item.amount}</td>
                                                 <td>
-                                                    <BuyCellItem
-                                                        qty={parseInt(item.amount)}
-                                                        pda={item.pda}
-                                                        wallet={wallet}
-                                                        creator={creatorAddress}
-                                                        fee={creatorFee}
-                                                        updateData={() => updatePage()}
-                                                        listId={item.id}
-                                                        tokenAddress={tokenAddress}
-                                                        price={parseFloat(item.price)}
-                                                        creatorFee={creatorFee}
-                                                        startLoading={() => props.startLoading()}
-                                                        closeLoading={() => props.closeLoading()}
-                                                    />
+                                                    {item.userAddress !== wallet.publicKey?.toBase58() &&
+                                                        <BuyCellItem
+                                                            qty={parseFloat(item.amount)}
+                                                            pda={item.pda}
+                                                            wallet={wallet}
+                                                            creator={creatorAddress}
+                                                            fee={creatorFee}
+                                                            updateData={() => updatePage()}
+                                                            listId={item.id}
+                                                            tokenAddress={tokenAddress}
+                                                            price={parseFloat(item.price)}
+                                                            creatorFee={creatorFee}
+                                                            startLoading={() => props.startLoading()}
+                                                            closeLoading={() => props.closeLoading()}
+                                                            openDeny={() => props.openDeny()}
+                                                            closeDeny={() => props.closeDeny()}
+                                                        />
+                                                    }
                                                 </td>
-                                                <td align="right">{item.userAddress === wallet.publicKey?.toBase58() && <span className="your-own">Your own listing</span>}</td>
+                                                <td align="right">
+                                                    {item.userAddress === wallet.publicKey?.toBase58() && <span className="your-own">Your own listing</span>}
+                                                </td>
                                             </tr>
                                         ))}
                                     </tbody>
@@ -348,6 +372,8 @@ export function BuyCellItem(props: {
     creatorFee: string,
     startLoading: Function,
     closeLoading: Function,
+    openDeny: Function,
+    closeDeny: Function
 }) {
 
     const { qty, pda, wallet, tokenAddress, creator, fee, updateData, listId, price, creatorFee, startLoading, closeLoading } = props;
@@ -368,9 +394,33 @@ export function BuyCellItem(props: {
             setAmount(value - 1);
         }
     }
+
+    const startHandle = () => {
+        setIsLoading(true);
+        props.openDeny();
+    }
+
+    const closeHandle = () => {
+        setIsLoading(false);
+        props.closeDeny();
+    }
+
     const buyTokens = async () => {
         try {
-            await buy(wallet, new PublicKey(pda), new PublicKey(creator), parseFloat(creatorFee), amount, tokenAddress, price, listId, qty, () => setIsLoading(true), () => setIsLoading(false), () => updateData())
+            await buy(
+                wallet,
+                new PublicKey(pda),
+                new PublicKey(creator),
+                parseFloat(creatorFee),
+                amount,
+                tokenAddress,
+                price,
+                listId,
+                qty,
+                () => startHandle(),
+                () => closeHandle(),
+                () => updateData()
+            )
         } catch (error) {
             console.log(error)
         }
@@ -388,7 +438,7 @@ export function BuyCellItem(props: {
                 <AddBoxRoundedIcon />
             </IconButton>
             <button className="max" onClick={() => setAmount(qty)}>max</button>
-            <button className="buy" onClick={() => buyTokens()}>
+            <button className="buy" onClick={() => buyTokens()} disabled={isLoading}>
                 {isLoading ?
                     <HashLoader size={16} color="#000" />
                     :

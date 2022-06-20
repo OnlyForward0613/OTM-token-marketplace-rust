@@ -1,2 +1,1 @@
-# OTM-token-marketplace-rust
-This is the Token💰 Marketplace💹
+# OTM_token_marketplace

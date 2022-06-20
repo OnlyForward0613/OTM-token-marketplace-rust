@@ -9,13 +9,14 @@ import ListingDialog from "./Dialog/ListingDialog";
 import HashLoader from "react-spinners/HashLoader";
 import CachedRoundedIcon from "@mui/icons-material/CachedRounded";
 import { listInstance, salesInstance } from "../firebase/marketOperation";
-import { getDocs } from "firebase/firestore";
+import { collection, getDocs, onSnapshot, orderBy, query } from "firebase/firestore";
 import { ListedTokenType } from "../contexts/types";
 import ListedTableRow from "./ListedTableRow";
 import MyListingRow from "./MyListingRow";
 import SalesHistoryRow from "./SalesHistoryRow";
+import { db } from "../firebase/firebaseConfig";
 
-export default function ListedTokenTable(props: { startLoading: Function, closeLoading: Function }) {
+export default function ListedTokenTable(props: { startLoading: Function, closeLoading: Function, openDeny: Function, closeDeny: Function }) {
   const wallet = useWallet();
   const [listing, setListing] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
@@ -24,8 +25,6 @@ export default function ListedTokenTable(props: { startLoading: Function, closeL
   const [keyword, setKeyword] = useState("");
 
   const [myListingLoading, setMyListingLoading] = useState(false);
-  const [isSalesLoading, setIsSalesLoading] = useState(false);
-  const [mySalesLoading, setMySalesLoading] = useState(false);
   const [myListed, setMyListed] = useState<any>([]);
   const [mySales, setMySales] = useState<any>([]);
   const [salesList, setSalesList] = useState<any>([]);
@@ -41,6 +40,7 @@ export default function ListedTokenTable(props: { startLoading: Function, closeL
   const handleSort = (event: SelectChangeEvent) => {
     setSort(event.target.value);
   };
+
   const getListedTokens = () => {
     setIsFetching(true)
     getDocs(listInstance)
@@ -239,6 +239,37 @@ export default function ListedTokenTable(props: { startLoading: Function, closeL
     // eslint-disable-next-line
   }, [wallet.connected, sort])
 
+
+  useEffect(() => {
+    const collectionRefToken = collection(db, "tokens");
+    const qToken = query(collectionRefToken);
+    const collectionRefListings = collection(db, "listings");
+    const qListings = query(collectionRefListings);
+    const collectionRefSales = collection(db, "sales");
+    const qSales = query(collectionRefSales);
+    onSnapshot(qToken, () => {
+      getListedTokens();
+      getMyListings();
+      getSalesHistory();
+    });
+    onSnapshot(qListings, () => {
+      getListedTokens();
+      getMyListings();
+      getSalesHistory();
+    });
+    onSnapshot(qSales, () => {
+      getListedTokens();
+      getMyListings();
+      getSalesHistory();
+    });
+    return;
+    // eslint-disable-next-line
+  }, [])
+
+  useEffect(() => {
+    props.closeDeny();
+  }, [])
+
   return (
     <div className="tokens-box" id="listed-tokens">
       <div className="tokens-box-action">
@@ -368,6 +399,8 @@ export default function ListedTokenTable(props: { startLoading: Function, closeL
                     pda={item.pda}
                     startLoading={() => props.startLoading()}
                     closeLoading={() => props.closeLoading()}
+                    openDeny={() => props.openDeny()}
+                    closeDeny={() => props.closeDeny()}
                   />
                 ))}
             </tbody>

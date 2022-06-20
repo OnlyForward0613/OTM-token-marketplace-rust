@@ -7,13 +7,16 @@ import { useState } from 'react'
 
 function RaffleApp({ Component, pageProps }) {
   const [loading, setLoading] = useState(false);
+  const [deny, setDeny] = useState(false);
   return (
     <Wallet>
-      <Header />
+      <Header deny={deny} />
       <Component
         {...pageProps}
         startLoading={() => setLoading(true)}
         closeLoading={() => setLoading(false)}
+        openDeny={() => setDeny(true)}
+        closeDeny={() => setDeny(false)}
       />
       <ToastContainer style={{ fontSize: 14 }} />
       <PageLoading loading={loading} />

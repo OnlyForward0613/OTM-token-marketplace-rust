@@ -4,12 +4,13 @@ import { AddIcon } from "../../components/svgIcons";
 import TokenSearch from "../../components/TokenSearch";
 import TokenDialog from "../../components/Dialog/TokenDialog";
 import { tokenInstance } from "../../firebase/marketOperation";
-import { getDocs } from "firebase/firestore";
+import { collection, getDocs, onSnapshot, orderBy, query } from "firebase/firestore";
 import AdminTableRow from "../../components/AdminTableRow";
 import CachedRoundedIcon from "@mui/icons-material/CachedRounded";
 import HashLoader from "react-spinners/HashLoader";
 import ArrowDownwardRoundedIcon from "@mui/icons-material/ArrowDownwardRounded";
 import ArrowUpwardRoundedIcon from "@mui/icons-material/ArrowUpwardRounded";
+import { db } from "../../firebase/firebaseConfig";
 
 export default function TokenManagement() {
 
@@ -25,9 +26,11 @@ export default function TokenManagement() {
         setDialogTitle(title);
     }
 
-    const getTokens = () => {
+    const getTokens = (notLoading?: boolean) => {
         setTokenList([]);
-        setIsFetching(true);
+        if (notLoading) {
+            setIsFetching(true);
+        }
         getDocs(tokenInstance)
             .then((data) => {
                 const tokens = (data.docs.map((item) => {
@@ -69,6 +72,16 @@ export default function TokenManagement() {
         getTokens();
         // eslint-disable-next-line
     }, [sort])
+
+    useEffect(() => {
+        const collectionRef = collection(db, "tokens");
+        const q = query(collectionRef);
+        onSnapshot(q, () => {
+            getTokens(false);
+        });
+        return;
+        // eslint-disable-next-line
+    }, [])
 
     return (
         <main className="main-page">

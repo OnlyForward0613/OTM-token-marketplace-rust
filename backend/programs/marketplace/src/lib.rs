@@ -17,7 +17,7 @@ use constants::*;
 use error::*;
 use utils::*;
 
-declare_id!("GvZajWcoaaencLox2VZr42p6qt3RTtvXXh7TrsVc59N4");
+declare_id!("7SN8mRUkP2XbNgvzkKbbcRvhafvGLCd5WAZXVV2qxQs");
 
 #[program]
 pub mod marketplace {
@@ -52,7 +52,7 @@ pub mod marketplace {
         token_list.lister = lister.key();
         token_list.token_address = token_mint.key();
         token_list.price = price;
-        token_list.amount = amount;
+        token_list.amount += amount;
         token_list.decimals = decimals;
 
         Ok(())

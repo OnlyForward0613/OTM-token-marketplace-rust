@@ -42,8 +42,8 @@ export default function ListingDialog(props: {
     const [isLoading, setIsLoading] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
 
-    const [listPrice, setListPrice] = useState();
-    const [listAmount, setListAmount] = useState();
+    const [listPrice, setListPrice] = useState<number | undefined>();
+    const [listAmount, setListAmount] = useState<number | undefined>();
     const getUserTokens = async () => {
         const spls = await getSPLTokensInfo(wallet);
         let filteredSpls: any = [];
@@ -141,7 +141,15 @@ export default function ListingDialog(props: {
         if (!listPrice) return;
         if (!listAmount) return;
         try {
-            await listToken(wallet, new PublicKey(selectedToken), listPrice, listAmount, () => setIsProcessing(true), () => setIsProcessing(false), () => dialogUpdate())
+            await listToken(
+                wallet,
+                new PublicKey(selectedToken),
+                listPrice,
+                listAmount,
+                () => setIsProcessing(true),
+                () => setIsProcessing(false),
+                () => dialogUpdate()
+            )
         } catch (error) {
             console.log(error)
         }
@@ -183,7 +191,7 @@ export default function ListingDialog(props: {
                                     >
                                         {
                                             userTokens.map((item: UserTokenType, key: number) => (
-                                                <MenuItem value={item.tokenAddress} key={key} >{item.tokenAddress.slice(0, 8)}...{item.tokenAddress.slice(-8)} <span style={{ marginLeft: 8 }}><b>({item.uiAmountString})</b></span></MenuItem>
+                                                <MenuItem value={item.tokenAddress} key={key} >{item.tokenAddress.slice(0, 8)}...{item.tokenAddress.slice(-8)} <span style={{ marginLeft: 8 }}><b>({parseFloat(item.uiAmountString).toLocaleString()})</b></span></MenuItem>
                                             ))
                                         }
                                     </Select>

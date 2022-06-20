@@ -1,6 +1,6 @@
 .btn-primary {
     background: #00a3ff;
-    box-shadow: 0px 4px 4px #000000;
+    box-shadow: 0px 4px 4px #00000040;
     border-radius: 15px;
     font-family: "Inter";
     font-style: normal;
@@ -365,6 +365,10 @@ table.history-table {
         &:hover {
             background: #d87123;
             transition: all 0.2s;
+        }
+        &:disabled {
+            background-color: #777;
+            cursor: no-drop;
         }
     }
 }

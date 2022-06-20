@@ -134,78 +134,84 @@ export default function ListedTableRow(props: {
     }, [])
     return (
         ((name + tokenAddress + floorPrice + wallet.publicKey?.toBase58()).toLowerCase().indexOf(props.keyword.toLowerCase()) !== -1 ?
-            <tr >
-                <td>
-                    <div className="table-title-cell">
-                        {isFetching ?
-                            <>
-                                <Skeleton variant="circular" width={32} height={32} sx={{ background: "#ffffff2e" }} />
-                                <Skeleton variant="rectangular" width={160} height={24} sx={{ background: "#ffffff2e", borderRadius: 1, marginLeft: 1 }} />
-                                <Skeleton variant="rectangular" width={60} height={24} sx={{ background: "#ffffff2e", borderRadius: 1, marginLeft: 1 }} />
-                            </>
-                            :
-                            <Link href={"/token/" + tokenAddress}>
-                                <a>
-                                    {/* eslint-disable-next-line */}
-                                    <img
-                                        src={icon ? icon : "/img/unknown-icon.png"}
-                                        alt=""
-                                    />
-                                    <h5>{name}</h5>
-                                </a>
-                            </Link>
-                        }
-                    </div>
-                </td>
-                <td>
-                    <div className="price-cell">
-                        <div className="price-cell-quantiry">
-                            <SolanaIcon />
-                            <span>{floorPrice}</span>
-                            {
-                                <p>{floorPercent.toLocaleString()}%</p>
+            (
+                quantity !== 0 ?
+                    <tr >
+                        <td>
+                            <div className="table-title-cell">
+                                {isFetching ?
+                                    <>
+                                        <Skeleton variant="circular" width={32} height={32} sx={{ background: "#ffffff2e" }} />
+                                        <Skeleton variant="rectangular" width={160} height={24} sx={{ background: "#ffffff2e", borderRadius: 1, marginLeft: 1 }} />
+                                        <Skeleton variant="rectangular" width={60} height={24} sx={{ background: "#ffffff2e", borderRadius: 1, marginLeft: 1 }} />
+                                    </>
+                                    :
+                                    <Link href={"/token/" + tokenAddress}>
+                                        <a>
+                                            {/* eslint-disable-next-line */}
+                                            <img
+                                                src={icon ? icon : "/img/unknown-icon.png"}
+                                                alt=""
+                                            />
+                                            <h5>{name}</h5>
+                                        </a>
+                                    </Link>
+                                }
+                            </div>
+                        </td>
+                        <td>
+                            <div className="price-cell">
+                                <div className="price-cell-quantiry">
+                                    <SolanaIcon />
+                                    <span>{floorPrice}</span>
+                                    {
+                                        <p>{floorPercent.toLocaleString()}%</p>
+                                    }
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div className="price-cell">
+                                <div className="price-cell-quantiry">
+                                    <SolanaIcon />
+                                    {
+                                        <span>{todayTotal.toLocaleString()}</span>
+                                    }
+                                </div>
+                                {
+                                    <p>{todayVolPercent.toLocaleString()}%</p>
+                                }
+                            </div>
+                        </td>
+                        <td>
+                            <div className="price-cell">
+                                <div className="price-cell-quantiry">
+                                    <SolanaIcon />
+                                    {
+                                        <span>{totalVol.toLocaleString()}</span>
+                                    }
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div className="price-cell">
+                                <div className="price-cell-quantiry">
+                                    <span>{quantity}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td align="center">
+                            {wallet.publicKey !== null &&
+                                <button className="btn-outline" onClick={() => router.push("/token/" + tokenAddress)}>
+                                    trade
+                                </button>
                             }
-                        </div>
-                    </div>
-                </td>
-                <td>
-                    <div className="price-cell">
-                        <div className="price-cell-quantiry">
-                            <SolanaIcon />
-                            {
-                                <span>{todayTotal.toLocaleString()}</span>
-                            }
-                        </div>
-                        {
-                            <p>{todayVolPercent.toLocaleString()}%</p>
-                        }
-                    </div>
-                </td>
-                <td>
-                    <div className="price-cell">
-                        <div className="price-cell-quantiry">
-                            <SolanaIcon />
-                            {
-                                <span>{totalVol.toLocaleString()}</span>
-                            }
-                        </div>
-                    </div>
-                </td>
-                <td>
-                    <div className="price-cell">
-                        <div className="price-cell-quantiry">
-                            <span>{quantity}</span>
-                        </div>
-                    </div>
-                </td>
-                <td align="center">
-                    {wallet.publicKey !== null &&
-                        <button className="btn-outline" onClick={() => router.push("/token/" + tokenAddress)}>
-                            trade
-                        </button>
-                    }
-                </td>
-            </tr>
+                        </td>
+                    </tr>
+                    :
+                    <></>
+            )
+
             :
             <>
             </>
